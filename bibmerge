@@ -1,0 +1,89 @@
+#! /usr/bin/perl
+
+# bibmerge - merge new BibTeX entries into a BibTeX database
+#
+# Usage: bibmerge <newfile.bib> <database.bib>
+#
+# newfile.bib is merged into database.bib; the merged entries
+# are resorted by alphabetic order of keys; the merged entries
+# are saved back into database.bib.
+#
+# Guaranteed not to clobber anything in <database.bib>; it can
+# only grow.
+#
+# DIAGNOSTICS:
+#   Warnings are printed about collisions; assign these new keys
+#   in newfile.bib and remerge.
+#
+
+$usage  = "bibmerge <newfile.bib> <database.bib>";
+if ($#ARGV != 1) { die("Usage: $usage\n"); }
+
+$newfile  = shift;
+$database = shift;
+
+
+
+				# keep a backup of the database
+open(BACKUP,">$database.bck") || die("Can't create backup database $database.bck");
+open(DATABASE,$database) || die("Can't open database $database");
+while (<DATABASE>)
+{
+    print BACKUP $_;
+}
+close(BACKUP);
+close(DATABASE);
+
+$/ = "";			# paragraph mode
+open(DATABASE,$database) || die("Can't open database $database");
+while (<DATABASE>)
+{
+    if (/\@string/)              # Journal abbrevs - add to preamble
+    { push(@preamble,$_); }
+    
+    elsif (/\@Article\{TitlesOn,/) # TDS's hack - add to preamble
+    { push(@preamble,$_); }
+
+    elsif (/\@.+\{\s*(\S+),/)	# Entries look like @Article{foo99, on  first line
+    {				# Save 'em in an associative array.
+	$key = $1;		
+	if ($entlist{$key} ne "") 
+	{ print "COLLISION in database on key $1:\n$_"; } # if already is such a key
+	else                     
+	{ $entlist{$key} = $_; }                          # if unique key
+    }
+
+    else			# if we don't recognize it, just add to preamble
+    {  push(@preamble,$_); }
+} 
+close(DATABASE);
+
+open(NEWDATA,$newfile) || die("Can't open new BibTeX data $newfile");
+while (<NEWDATA>)
+{
+    if (/\@string/)              # Journal abbrevs - ignore them and only keep master
+    { next; }	
+    
+    elsif (/\@Article\{TitlesOn,/) # ignore TDS's hack in its place, only keep master
+    { next; }			
+
+    elsif (/\@.+\{\s*(\S+),/)	# Entries look like @Article{foo99, on their first line
+    {				# Save 'em in an associative array.
+	$key = $1;		
+	if ($entlist{$key} ne "") 
+	{ print "COLLISION on key $key\n(New database will not include this entry)\n$_"; }
+	else
+	{ $entlist{$key} = $_; } # if unique key
+    }				
+}
+
+				# now sort by the keys, and save the sorted entries
+				# under the old database name
+
+open(DATABASE,">$database");
+print DATABASE @preamble, "\n";
+foreach $key (sort keys(%entlist))
+{
+    print DATABASE $entlist{$key};
+}
+close(DATABASE);

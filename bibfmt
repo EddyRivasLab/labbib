@@ -1,0 +1,146 @@
+#! /usr/bin/perl
+
+# bibfmt <bibkey>
+#
+# Looks up .bib entry corresponding to <bibkey> and
+# formats it in HTML.
+#
+# SRE, Mon Nov  3 10:07:47 1997
+# RCS $Header$
+
+require "importenv.pl";
+$master = "/nfs/wol2/people/eddy/lib/bib/master.bib";
+
+$key = shift;
+
+&get_bibfiles();
+&process_macros($master);
+$entry = &get_entry($key);
+($author, $title, $journal, $year, $volume, $pages, $pmid) = &parse_entry($entry);
+
+output_html($author, $title, $journal, $year, $volume, $pages, $pmid);
+
+#print $entry;
+
+
+# get_bibfiles()
+#
+# Sets up the global list @bibfiles, given a correctly set
+# environment variable $BIBINPUTS.
+#
+sub get_bibfiles {
+    local(@bibpaths, $bibpath, @newfiles, $newfile); 
+
+    @bibpaths = split(':',$BIBINPUTS); 
+
+    foreach $bibpath (@bibpaths) {
+	if ($bibpath eq "") { $bibpath = "."; }
+	opendir(BIBDIR,$bibpath) || die;
+	@newfiles = grep(/\.bib$/, readdir(BIBDIR));
+	foreach $newfile (@newfiles) {
+	    $newfile = $bibpath . "/" . $newfile;
+	    push(@bibfiles, $newfile);
+	}
+    }
+}
+
+
+# get_entry($key)
+#
+# Retrieves the .bib text for $key;
+# assumes that global @bibfiles contains list of valid .bib databases.
+#
+sub get_entry {
+    local($findkey) = @_;
+    local($entry, $foundone, $thiskey); 
+
+    foreach $bibfile (@bibfiles) {
+	open(BIBFILE,$bibfile) || die "$!\n";
+	while (<BIBFILE>) {
+	    if (/^@\S+\{(\S+),/) {
+		$thiskey = $1;
+		if ($findkey eq $thiskey) {
+
+		    $foundone = 1;
+		    $entry = $_;
+		    while (<BIBFILE>) {
+			if (/^@/) { last; }
+			$entry = $entry . $_;
+		    }
+		    close BIBFILE;
+		    return $entry;
+		}
+	    }
+	}
+	close BIBFILE;
+    }
+    die ("didn't find $findkey");
+}
+
+
+# parse_entry($entry)
+#
+# Parse an entry and return 
+#   ($author, $title, $journal, $year, $volume, $pages, $pmid)
+#
+sub parse_entry {
+    local($entry) = @_;
+    local ($author, $title, $journal, $year, $volume, $pages, $pmid);
+
+    @lines = split(", *\n", $entry);
+    foreach $line (@lines) {
+	$line =~ s/\n//g;
+	$line =~ s/  +/ /g;
+#	print $line, "\n";
+	if ($line =~ /^\s*author\s*=\s*[\"{](.+)[\"}]/)         { $author  = $1; }
+	if ($line =~ /^\s*title\s*=\s*[\"{](.+)[\"}]/)          { $title   = $1; }
+	if ($line =~ /^\s*journal\s*=\s*[\"{]?(\S.+[^\" }])[\"}]?\s*$/)  { $journal = $1; }
+	if ($line =~ /^\s*year\s*=\s*(\d+)/)                    { $year    = $1; }
+	if ($line =~ /^\s*volume\s*=\s*(\d+)/)                  { $volume  = $1; }
+	if ($line =~ /^\s*pages\s*=\s*[\"{](.+)[\"}]/)          { $pages   = $1; }
+	if ($line =~ /^\s*pmid\s*=\s*(\d+)/)                    { $pmid    = $1; }
+    }
+    return ($author, $title, $journal, $year, $volume, $pages, $pmid);
+}
+
+# output_html($author, $title, $journal, $year, $volume, $pages, $pmid)
+#
+# output in HTML format
+#
+sub output_html {
+    local($author, $title, $journal, $year, $volume, $pages, $pmid) = @_;
+
+    $author =~ s/ and/,/g;
+    $author =~ s/[{}]//g;     
+    $pages  =~ s/--/-/;
+    if ($is_abbrev{$journal}) { $journal = $fulljournal{$journal}; }
+    $title  =~ s/[{}]//g;     
+
+
+#    print "<p>\n";
+    print "$author.<br>\n" ;
+    if ($pmid) {
+	print "<a href=\"http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=pubmed&cmd=retrieve&list_uids=$pmid&dopt=abstract\">\n $title. </a><br>\n";
+    } else {
+	print "$title.\n";
+    }
+    print "<em> $journal</em> <strong>$volume:</strong>$pages, $year\n";
+}
+
+
+
+sub process_macros {
+    local ($master) = @_;
+    my ($abbrev, $full);
+
+    open(MASTER, $master) || die ("couldn't open master bib file $master\n");
+    while (<MASTER>) {
+	if (/^\@string\{(\S+)\s*=\s*\"(.+)\"\}/) {
+	    $abbrev = $1;
+	    $full   = $2;
+
+	    $is_abbrev{$abbrev} = 1;
+	    $fulljournal{$abbrev} = $full;
+	}
+    }
+}

@@ -1,0 +1,38 @@
+#!/usr/bin/perl
+
+# Usage: lookup <string>
+#
+# Print all bibtex entries containing <string>.
+#
+#  -k : match only the cite key.
+#  -u : print just the first matching entry, not all.
+#
+# SRE, Tue Mar 11 14:01:47 1997
+
+require "getopts.pl";
+require "importenv.pl";
+
+&Getopts("uk");
+if ($opt_k) { $do_citekey = 1;}
+if ($opt_u) { $do_justone = 1;}
+
+$search = shift;
+@bibpaths = split(':',$BIBINPUTS); 
+$/ = "";
+
+foreach $bibpath (@bibpaths) {
+    if ($bibpath eq "") { $bibpath = "."; }
+    opendir(BIBDIR,$bibpath) || die "couldn't open $bibpath";
+    @bibfiles = grep(/\.bib$/, readdir(BIBDIR));
+    closedir(BIBDIR);
+    foreach $bibfile (@bibfiles) {
+	open(BIBFILE, "$bibpath/$bibfile") || die "couldn't open $bibpath/$bibfile: $!\n";
+	while (<BIBFILE>) {	 
+	    if (($do_citekey && /@\S+\s*\{$search,/) || (!$do_citekey && /$search/)) {
+		print; 
+		if ($do_justone) { exit; }
+	    }
+	}
+	close(BIBFILE);
+    }
+}

@@ -1,0 +1,179 @@
+#! /usr/bin/perl
+
+# Example of use:
+# ---------
+# > pubmed2bib
+# Biochimie 1996;78(5):302-310 
+#
+# Fully automated genome analysis that reflects user needs and preferences. A
+# detailed introduction to the MAGPIE system architecture.
+#
+# Gaasterland T, Sensen CW...
+#.
+# -------------
+# 
+# i.e. cut and paste the PubMed Web stuff in, then do a '.'
+# to end. A BibTeX entry is then printed, which can be cut and
+# pasted into the current bib file and edited further.
+#
+
+# First line is reference.
+#
+while (<>)
+{
+    if (/^\s*(.+) ([12][90]\d\d).*;\s*(\d+)\(?.+:\s*(\d+)-(\d+)/)
+    {
+	$journal   = $1;
+	$year      = $2;
+	$volume    = $3;
+	$startpage = $4;
+	$endpage   = $5;
+	last;
+    }
+    # Single page style: BMC Bioinformatics
+    elsif (/^\s*(.+) ([12][90]\d\d).*;\s*(\d+)\(?.+:\s*(\d+)/)
+    {
+	$journal   = $1;
+	$year      = $2;
+	$volume    = $3;
+	$startpage = $4;
+	$endpage   = -1;
+	last;
+    }
+}
+				# This little trick turns e.g. "2185-95" into 2185-2195.
+if (($endpage != -1) && ($diff = length($startpage) - length($endpage))) {
+    $endpage = substr($startpage, 0, $diff) . $endpage;
+}
+#print "REF $journal ($year) $volume:$startpage-$endpage\n" ;
+
+
+# Next line(s) is title; concatenate before further processing.
+#
+$intitle = 0;
+while (<>)
+{
+    if (/^\s*Related Articles, /) { next; } # skip the link line
+    if (/^\s*Books, /)            { next; } # skip the link line - rare case, new article
+    if (/^\s*\[.*\]\s*$/)           { next;}  # skip [] image crap
+    if (/^\s*$/) {	               # skip blank lines until we reach title
+	if ($intitle) { last; } else { next; }
+    }
+    chop;
+    if (/^\s*(.+)$/) {
+	if (/^\s*Comment [oi]n:\s*$/)      { next; }
+	if (/^\s*Erratum in:\s*$/)         { next; }
+	if (/;\d+\(\d+\):\d+/)  { next; } 
+	if ($intitle) { $title = $title." ".$1; }
+	else {$title = $1; }
+	$intitle = 1;
+    }
+}
+				# remove trailing period.
+if ($title =~ /^(.+)\.$/) { $title = $1; }
+$title = process_title($title);
+#print "TITLE $title\n" ;
+
+
+
+# Next line(s) is authors. Concatenate before processing.
+#
+$inauthor   = 0;
+$authorline = "";
+while (<>)
+{
+    if (/^\s*$/) {	               # skip blank lines until we reach authors
+	if ($inauthor) { last; } else { next; }
+    }
+    elsif (/^\s*(.+)$/) {
+	chop;
+	$authorline = $authorline." ".$1;
+	$inauthor = 1;
+    }
+}   
+@authors = split(/,/, $authorline);
+#foreach $author (@authors) {
+#    print "AUTHOR = \"$author\"\n";
+#}
+    
+# Wait for .
+#	
+
+if (! /^\./) {
+    while (<>)
+    {
+	if (/^\s*PMID:\s*(\d+)/) {$pmid = $1; }
+	if (/^\./) { last; }
+    }
+}
+
+# Output.
+#
+
+print "\@Article{,\n";
+print "  author =       {";
+$ok = 0;
+foreach $author (@authors) {
+    if ($ok) { print " and "; }
+    ($surname, $initials) = $author =~ /^\s*(.+) ([A-Z]+)\.?$/;
+    $initials =~ s/[A-Z]/$&. /g;
+    print "$initials$surname";
+    $ok = 1;
+}
+print "},\n";
+print "  title =        {$title},\n";
+print "  journal =      {$journal},\n";
+print "  year =         $year,\n";
+print "  volume =       $volume,\n";
+if ($endpage != -1) {
+    print "  pages =        {$startpage--$endpage},\n";
+} else {
+    print "  pages =        {$startpage},\n";
+}
+print "  OPTfiled  =    {},\n";
+print "  OPTmynote =    {},\n";
+print "  OPTpmid =      $pmid,\n";
+print "}\n"; 
+
+
+sub process_title
+{
+    my ($title) = @_;
+    my @words;
+    my $i, $j;
+
+    # Remove crap
+    $title =~ s/Click here to read //g;
+
+    @words = split(' ', $title);
+    $title = "";
+    for ($i = 0; $i <= $#words; $i++) 
+    {
+	if ($i > 0) { $title .= " "; }
+	@subword = split('-', $words[$i]);
+	$words[$i] = "";
+	for ($j = 0; $j <= $#subword; $j++) {
+	    if ($j > 0) { $words[$i] .= "-" };
+	    $subword[$j] = &process_word($subword[$j]);
+	    $words[$i] .= $subword[$j];
+	}
+	$title .= $words[$i];
+    }
+    return $title;
+}
+
+sub process_word
+{
+    my ($word) = @_;
+
+    if ($word =~ /[A-Z]\S*[A-Z]/) {
+	$word = "{$word}";
+    } 
+    elsif (length($word) >= 4) {
+	$word = ucfirst($word);
+    }
+    return $word;
+}
+		
+ 
+

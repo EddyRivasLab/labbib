@@ -1,0 +1,200 @@
+BibTeX databases maintained in the lab:
+   master.bib   - most of the database.
+   books.bib    - most books are separated out here.
+   lab.bib      - the lab's own publications are here.
+
+Possibly useful scripts:
+   pubmed2bib   - converts NCBI pubmed abstract to most of a new bibtex entry.
+   bibmerge     - merges two bibtex databases
+   bibfmt       - converts a bibtex entry to HTML
+   lookup       - finds entries in bibtex database that match a keyword
+   bibdistill   - extracts a .bib bibliography appropriate for one manuscript.
+
+________________________________________________________________
+
+1. How the database and the lab's article and book collections work (or,
+   rather, are supposed to work, and in many cases actually do):
+
+The lab has a growing collection of articles on file. Feel free to
+borrow articles from the file, so long as you return them. They are
+indexed by "main" author. For authors with a lot of papers on file,
+there will be a separate file for them (look for "Zuker, Michael").
+If there's not a separate file, look in the generic file by first
+letter of their name (Joe Sixpack would be in "S"). Many (most?) of
+these articles are indexed in the lab's bibtex database.
+
+Each paper article is marked in two ways. First, it has its bibtex
+database key written on it (i.e. MathewsTurner99); and if that's
+underlined, that means it's not just been assigned a key, it's
+actually been entered in the database. Second, the name that we filed
+the article under is (usually) circled. 
+
+(If you find articles where this is not true, fix it. If you find
+articles we've filed that are not in the database yet, enter them, if
+you have time.)
+
+You can look up articles by keyword. For example: 
+   % lookup Mathews
+returns, among other things, the entry:
+
+@Article{MathewsTurner99,
+  author =       {D. H. Mathews and J. Sabina and M. Zuker and D. H. Turner},
+  title =        {Expanded Sequence Dependence of Thermodynamic
+                  Parameters Improves Prediction of {RNA} Secondary
+                  Structure},
+  journal =      JMB,
+  year =         1999,
+  volume =       288,
+  pages =        {911--940},
+  filed =        {Mathews},
+  pmid =         10329189,
+}
+
+The {filed} field tells you what name we indexed the article under, so
+you can find it in our files. Not many of our .bib entries have this,
+though, so usually you'll have to guess.
+
+The PMID field is the pubmed identifier. This lets us use the .bib
+database to automatically construct HTML links (see the bibfmt
+script).
+
+The books.bib database is specialized to books (duh). It should carry
+unique isbn numbers for each book. But stupidly, it's currently put
+this info in an unstructured note; this will change to an {isbn}
+field. The reason is the same as for having a {pmid} field in the
+articles: scripts can use the database to automatically construct
+appropriate HTML links.
+
+The lab.bib database is specialized to our own lab's publications.  It
+includes a {url} field, which links to the site of the online
+publication, if any. Eventually it'll also include a field for the
+link to our preprint server.
+
+________________________________________________________________
+
+2. Using the bibtex databases, especially when writing papers:
+   
+ First get them from the CVS repository. They're in my (Sean's)
+ repository, so make sure you set your CVSROOT appropriately;
+ either manually, or (as most of us have in our .cshrc's) by an
+ alias you set up.
+
+   % setenv CVSROOT :ext:<yourusername>@skynet.wustl.edu:/repository/sre
+   % cvs checkout labbib
+
+ You now have a directory called "labbib/".  Make sure your BibTeX
+ include path includes this directory. For instance, if you put
+ labbib in your home directory, and you also have your own bibtex
+ databases in lib/bib:
+
+   % setenv BIBINPUTS :$HOME/labbib:$HOME/lib/bib
+
+ In your .tex file, the \bibliography command to load the databases is:
+   
+   \bibliography{master,books,lab}
+
+ The order is important: master needs to come first, because it contains
+ macro definitions (journal name abbreviations) that the other database
+ files use.
+
+ Remember that the bibtex database is under revision constantly. 
+ To update your version from the CVS repository, (remember to have
+ $CVSROOT set right), and do:
+
+   % cvs update
+
+________________________________________________________________
+
+3. Adding to, or editing the bibtex database:
+
+You can use the database without fear; when you venture to become bold
+enough to add to it yourself, here's how to do it. CVS gives us the
+ability to roll back any changes easily, so even if you screw up, the
+worse that happens is we fix it. You can't lose any data.
+
+Simplest way is to edit the .bib files directly. 
+
+Emacs has a convenient bibtex mode; for instance, in bibtex mode, C-c
+C-e C-a starts a new article entry. "M-x describe-mode" to see the
+documentation. My bibtex mode is customized a little in my .emacs
+file; feel free to look at that.
+
+If you add a new entry, you have to choose a unique key. Keys are
+constructed from the first author's last name plus a two-digit
+year. If that's not a unique enough name or if you want the key to be
+retrievable on the senior authors' name too, from the senior author's
+last name too. If the key still isn't unique, we add "b", "c", etc.
+to the end.  For example, Eddy94, MathewsTurner99, RivasEddy00,
+RivasEddy00b, RivasEddy00c are typical keys. Write the key on the
+paper article, so someone who gets the article knows it's been
+indexed.
+
+After editing, remember to commit your changes to CVS:
+
+   % cvs commit
+
+You might feel safer creating a new file of your own, and merging it
+into the master database later. I often do this. Say you've made your
+own database, new.bib. To merge it into master.bib, use the "bibmerge"
+command:
+
+  % bibmerge new.bib master.bib
+
+If it complains about anything, fix what it's complaining about. If
+not, it worked. master.bib now contains the merged databases.
+master.bib.bck is a backup of the original master.bib; you can delete
+that, if everything went well. You can delete new.bib too. Remember to
+check in your updated master.bib:
+
+  % cvs commit
+
+________________________________________________________________
+
+4. Using pubmed2bib
+
+From the NCBI PubMed abstract page, mouse-copy everything from the
+journal line (starting at the first character of the journal name) to
+after the PMID line, and paste that into:
+
+   % cat | pubmed2bib
+
+hit return, and at the end of the resulting spew will be a skeleton
+.bib entry. For example, from the abstract in: 
+
+http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&list_uids=14499004&dopt=Abstract
+
+if we cut from
+  BMC Bioinformatics. 2003...
+to
+  PMID: 14499004 [PubMed - as supplied by publisher]
+and paste, we get:
+
+@Article{,
+  author =       {R. J. Klein and S. R. Eddy},
+  title =        {{RSEARCH:} Finding Homologs of Single Structured {RNA} Sequences},
+  journal =      {BMC Bioinformatics.},
+  year =         2003,
+  volume =       4,
+  pages =        {44},
+  OPTfiled  =    {},
+  OPTmynote =    {},
+  OPTpmid =      14499004,
+}
+
+You still have to assign it a key, and fill in the {filed} field, and
+you might have to clean it up (remove that period after the journal;
+look out for capitalization issues in the title; change journal names
+to our standard database abbrevs like NAR, JMB, if you like). After
+all that, in emacs, C-c C-c finishes the entry up and deletes any
+unused OPT (optional) fields you didn't fill in.
+
+________________________________________________________________
+CVS $Id$
+
+
+
+
+
+  
+
+

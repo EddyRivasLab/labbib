@@ -1,0 +1,44 @@
+#! /usr/bin/perl
+
+# bibdistill <latex'ed .aux file>
+# Create a specialized .bib file just for one manuscript,
+# by retrieving all citations in .bib format from the master
+# database.
+# 
+# Assumes that .aux file contains lines of the form:
+#   \citation{WeinsteinSteitz99,BachellerieCavaille98,Meguro01}
+# and that these keys uniquely identify a bibtex entry in the
+# master databases that can be retrieved by the 'lookup' script.
+#
+# Also assumes that the master bibliography is in ~/labbib/master.bib
+# It needs this to extract the @string macros for journal abbreviations.
+# 
+# SRE, Tue Jul 31 10:38:30 2001; STL5 p.23
+#
+
+$master  = "~/labbib/master.bib";
+$auxfile = shift;
+open(AUXFILE,$auxfile) || die;
+
+# Set $saw{$cite} to 1 for every citation key $cite that we see.
+#
+while (<AUXFILE>) {
+    if (/\\citation\{(.+)\}/) { 
+	$citestring = $1;
+	@newcites = split(',',$citestring);
+	foreach $cite (@newcites) {
+	    $saw{$cite} = 1;
+	}
+    }
+}
+
+print "# This .bib file was distilled from a master bibliography\n";
+print "# by bibdistill.pl. DO NOT EDIT.\n";
+print "#\n";
+
+system ("grep \"\@string\" $master");
+
+foreach $cite (sort keys(%saw)) {
+    system("lookup -ku $cite");
+}
+
