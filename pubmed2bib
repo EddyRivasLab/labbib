@@ -30,8 +30,8 @@ while (<>)
 	$endpage   = $5;
 	last;
     }
-    # Single page style: BMC Bioinformatics
-    elsif (/^\s*(.+) ([12][90]\d\d).*;\s*(\d+)\(?.+:\s*(\d+)/)
+    # Single page (epub) style: BMC Bioinformatics, PLoS Biology
+    elsif (/^\s*(.+) ([12][90]\d\d).*;\s*(\d+)\(?.+:\s*(E?\d+)/)
     {
 	$journal   = $1;
 	$year      = $2;
