@@ -74,12 +74,11 @@ ________________________________________________________________
 
 2. Using the bibtex databases, especially when writing papers:
    
- First get them from the CVS repository. They're in my (Sean's)
- repository, so make sure you set your CVSROOT appropriately;
- either manually, or (as most of us have in our .cshrc's) by an
- alias you set up.
+ First get them from the CVS repository. They're in the lab's
+ repository, "selab", so make sure you set your CVSROOT appropriately;
+ either manually, or by an alias you set up in your .cshrc:
 
-   % setenv CVSROOT :ext:<yourusername>@skynet.wustl.edu:/repository/sre
+   % setenv CVSROOT :ext:<yourusername>@skynet.wustl.edu:/repository/selab
    % cvs checkout labbib
 
  You now have a directory called "labbib/".  Make sure your BibTeX
