@@ -41,8 +41,9 @@ while (<>)
 	last;
     }
 }
+
 				# This little trick turns e.g. "2185-95" into 2185-2195.
-if (($endpage != -1) && ($diff = length($startpage) - length($endpage))) {
+if (($endpage != -1) && ($diff = length($startpage) - length($endpage)) > 0) {
     $endpage = substr($startpage, 0, $diff) . $endpage;
 }
 #print "REF $journal ($year) $volume:$startpage-$endpage\n" ;
