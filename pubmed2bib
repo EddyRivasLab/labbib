@@ -21,8 +21,8 @@
 #
 while (<>)
 {
-    #      (journal) (year)           (vol)
-    if (/^\s*(.+) ([12][90]\d\d).*;\s*(\d+)\(?.+:\s*(\S?\d+)-(\d+)/)
+    #          (journal) (year)           (vol)
+    if (/^\d?:?\s*(.+) ([12][90]\d\d).*;\s*(\d+)\(?.*:\s*(\S?\d+)-(\d+)/)
     {
 	$journal   = $1;
 	$year      = $2;
@@ -32,7 +32,8 @@ while (<>)
 	last;
     }
     # Single page (epub) style: BMC Bioinformatics, PLoS Biology
-    elsif (/^\s*(.+) ([12][90]\d\d).*;\s*(\d+)\(?.+:\s*(E?\d+)/)
+    #       (journal)   (year)           (vol) 
+    elsif (/^\d?:?\s*(.+) ([12][90]\d\d).*;\s*(\d+)\(?.*:\s*([Ee]?\d+)/)
     {
 	$journal   = $1;
 	$year      = $2;
@@ -61,11 +62,13 @@ while (<>)
     if (/^\s*$/) {	               # skip blank lines until we reach title
 	if ($intitle) { last; } else { next; }
     }
+    if (/^\s*Click here to read\s*/)   { next; }
+    if (/^\s*Comment [oi]n:\s*$/)      { next; }
+    if (/^\s*Erratum in:\s*$/)         { next; }
+    if (/;\d+\(\d+\):\d+/)             { next; } 
+
     chop;
     if (/^\s*(.+)$/) {
-	if (/^\s*Comment [oi]n:\s*$/)      { next; }
-	if (/^\s*Erratum in:\s*$/)         { next; }
-	if (/;\d+\(\d+\):\d+/)  { next; } 
 	if ($intitle) { $title = $title." ".$1; }
 	else {$title = $1; }
 	$intitle = 1;
