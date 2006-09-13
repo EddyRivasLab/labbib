@@ -82,7 +82,7 @@ $title = process_title($title);
 
 
 # Next line(s) is authors. Concatenate before processing.
-#
+# New pubmed has one author/line, w/ leading "*" on each line (Sept 2006)
 $inauthor   = 0;
 $authorline = "";
 while (<>)
@@ -90,8 +90,11 @@ while (<>)
     if (/^\s*$/) {	               # skip blank lines until we reach authors
 	if ($inauthor) { last; } else { next; }
     }
+    elsif (/^\s*\*\s+(.+)$/) {	# new style: remove the * items.
+	$authorline = $authorline." ".$1;
+	$inauthor = 1;
+    }
     elsif (/^\s*(.+)$/) {
-	chop;
 	$authorline = $authorline." ".$1;
 	$inauthor = 1;
     }
