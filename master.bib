@@ -33,11 +33,7 @@
 @string{GDEV   = "Genes Dev."}
 @string{GR     = "Genome Res."}
 @string{IRC    = "Int. Rev. Cytol."}
-@string{ISMB   = "Proc. Int. Conf. on Intelligent Systems in Molecular Biology"}
-@string{ISMB94 = "Proc. Int. Conf. on Intelligent Systems in Molecular Biology"}
-@string{ISMB95 = "Proc. Int. Conf. on Intelligent Systems in Molecular Biology"}
-@string{ISMB96 = "Proc. Int. Conf. on Intelligent Systems in Molecular Biology"}
-@string{ISMB97 = "Proc. Int. Conf. on Intelligent Systems in Molecular Biology"}
+@string{ISMB   = "Proc. Int. Conf. Intell. Syst. Mol. Biol."}
 @string{JBACT  = "J. Bacteriol."}
 @string{JBC    = "J. Biol. Chem."}
 @string{JBSD   = "J. Biomol. Struct. Dyn."}
@@ -57,6 +53,7 @@
 @string{PNARMB = "Prog. Nucl. Acids Res. Mol. Biol."}
 @string{PNAS   = "Proc. Natl. Acad. Sci. USA"}
 @string{PROTS  = "Protein Sci."}
+@string{PSB    = "Pac. Symp. Biocomput."}
 @string{SIAMJC = "SIAM Journal of Computing"}
 @string{TIBTECH= "Trends Biotech."}
 @string{TIBS   = "Trends Biochem. Sci."}
@@ -222,7 +219,7 @@ YEAR = 1959}
   author = 	 {P. Agarwal and D. J. States},
   title = 	 {The Repeat Pattern Toolkit ({RPT}): Analyzing the
                   Structure and Evolution of the {\emph{C. elegans}} Genome},
-  journal = 	 ISMB94,
+  journal = 	 ISMB,
   year = 	 1994,
   volume =	 2,
   pages =	 {1--9},
@@ -254,6 +251,16 @@ YEAR = 1959}
   title = 	"Algorithms for Finding Patterns in Strings",
   note = 	"preprint of book chapter",
   year = 	1989
+}
+
+@Article{AhrensDieter73,
+  author = 	 {J. H. Ahrens and U. Dieter},
+  title = 	 {Extensions of {F}orsythe's Method for Random Sampling
+                  from the Normal Distribution}, 
+  journal = 	 {Math. Comput.},
+  year = 	 1973,
+  volume =	 27,
+  pages =	 {927--937}
 }
 
 @Article{AibaMizushima87,
@@ -387,6 +394,18 @@ YEAR = 1987}
   year =	 1999,
   editor =	 {R. F. Gesteland and T. R. Cech and J. F. Atkins},
   address =	 {New York}
+}
+
+@Article{AltschulErickson85,
+  author = 	 {S. F. Altschul and B. W. Erickson},
+  title =        {Significance of Nucleotide Sequence Alignments: a
+                  Method for Random Sequence Permutation That
+                  Preserves Dinucleotide and Codon Usage},
+  journal =      MBE,
+  year =         1985,
+  volume =       2,
+  pages =        {526--538},
+  pmid =	 3870875,
 }
 
 @Article{Altschul01,
@@ -925,7 +944,7 @@ YEAR = 1989}
   author = 	 {T. L. Bailey and C. Elkan},
   title = 	 {Fitting a Mixture Model By Expectation Maximization
                   to Discover Motifs in Biopolymers},
-  journal = 	 ISMB94,
+  journal = 	 ISMB,
   year = 	 1994,
   volume =	 2,
   pages =	 {28--36}
@@ -1716,7 +1735,7 @@ YEAR = 1989}
   title = 	 {Dynamite: A Flexible Code Generating Language for
                   Dynamic Programming Methods Used in Sequence
                   Comparison},
-  booktitle = 	 ISMB97,
+  booktitle = 	 ISMB,
   year = 	 1997,
   publisher =    {AAAI Press},
   location =     {Menlo Park, CA},
@@ -2564,11 +2583,13 @@ YEAR = 1990}
   pages =	 {3-23}
 }
 
-@InProceedings{BucherHofmann96,
+@Article{BucherHofmann96,
   author = 	 {P. Bucher and K. Hofmann},
   title = 	 {A Sequence Similarity Search Algorithm Based on a
                   Probabilistic Interpretation of an Alignment Scoring System},
-  crossref = 	 "ismb96",
+  journal = 	 ISMB,
+  year =         1996,
+  volume =       4,
   pages =	 {44-51}
 }
 
@@ -2612,6 +2633,17 @@ YEAR = 1990}
   volume =       273,
   pages =        {1058-1073},
   mynote =	 {TIGR; Methanococcus jannaschii complete genome},
+}
+
+@Article{BundschuhHwa00,
+  author = 	 {R. Bundschuh and T. Hwa},
+  title = 	 {An Analytical Study of the Phase Transition Line in
+                  Local Sequence Alignment with Gaps},
+  journal = 	 {Discrete Applied Math.},
+  year = 	 2000,
+  volume =	 104,
+  pages =	 {113--142},
+  filed =	 {Bundschuh}
 }
 
 @Article{Burd94,
@@ -2914,15 +2946,13 @@ YEAR = 1990}
   pmid =	 11248560,
 }
 
-@InProceedings{CaryStormo95,
+@Article{CaryStormo95,
   author = 	 {Robert B. Cary and Gary D. Stormo},
   title = 	 {Graph-Theoretic Approach to {RNA} Modeling Using
                   Comparative Data},
-  booktitle = 	 {ISMB95},
-  editor =	 {C. Rawlings and others},
+  journal = 	 ISMB,
+  volume =       {5},
   year =	 1995,
-  publisher =	 {AAAI Press},
-  address =      {Menlo Park, CA},
   pages =	 {75-80}
 }
 
@@ -4734,6 +4764,27 @@ YEAR = 1990}
   pages =	 {48--51}
 }
 
+@Article{Drasdo98,
+  author = 	 {D. Drasdo and T. Hwa and M. Lassig},
+  title = 	 {A Statistical Theory of Sequence Alignment With Gaps},
+  journal = 	 ISMB,
+  volume =	 6,
+  pages =	 {52--58},
+  year =	 1998,
+  pmid =         {9783209},
+}
+
+@Article{Drasdo00,
+  author = 	 {D. Drasdo and T. Hwa and M. L\"{a}ssig},
+  title = 	 {Scaling Laws and Similarity Detection in Sequence
+                  Alignment with Gaps},
+  journal = 	 JCompB,
+  year = 	 2000,
+  volume =	 7,
+  pages =	 {115--141},
+  pmid =	 10890391
+}
+
 @Article{Dreyfus91,
   author = 	 "David H. Dreyfus and Scott W. Emmons",
   title = 	 "A Transposon-Related Palindromic Repetitive Sequence
@@ -6359,7 +6410,7 @@ YEAR = 1990}
   author = 	 {J. Gorodkin and L. J. Heyer and G. D. Stormo},
   title = 	 {Finding Common Sequence and Structure Motifs in a
                   Set of {RNA} Sequences},
-  journal = 	 ISMB97,
+  journal = 	 ISMB,
   year = 	 1997,
   volume =	 5,
   pages =	 {120-123}
@@ -6477,14 +6528,13 @@ YEAR = 1988}
   muid =	 98213803,
 }
 
-@InProceedings{Grate95,
+@Article{Grate95,
   author = 	 {Leslie Grate},
   title = 	 {Automatic {RNA} Secondary Structure Determination
                   with Stochastic Context-Free Grammars},
-  booktitle = 	 ISMB95,
-  editor =	 {C. Rawlings and others},
+  journal = 	 ISMB,
+  volume =       {3},
   year =	 1995,
-  publisher =	 {AAAI Press},
   pages =        {136-144}
 }
 
@@ -8512,6 +8562,40 @@ YEAR = 1991}
   pmid =	 15024405,
 }
 
+@InCollection{Hwa96,
+  author = 	 {T. Hwa},
+  title = 	 {From Flux Pinning to {DNA} Sequence Alignment:
+                  Applications of Localization in a Random Environment},
+  booktitle = 	 {Quantum Coherence and Decoherence},
+  pages =	 {109--114},
+  publisher =	 {Elsevier},
+  year =	 1996,
+  editor =	 {K. Fujikawa and Y. A. Ono},
+  address =	 {Amsterdam},
+  filed =	 {Hwa}
+}
+
+@Article{HwaLassig96,
+  author = 	 {T. Hwa and M. L\"{a}ssig},
+  title = 	 {Similarity Detection and Localization},
+  journal = 	 {Phys. Rev. Lett.},
+  year = 	 1996,
+  volume =	 76,
+  pages =	 {2591-2594},
+  filed =	 {Hwa},
+  pmid =	 10060738
+}
+
+@InCollection{HwaLassig98,
+  author = 	 {T. Hwa and M. L\"{a}ssig},
+  title = 	 {Optimal Detection of Sequence Similarity by Local Alignment},
+  booktitle = 	 {Proc. Second Annual Intl. Conf. on Comp. Mol. Biol. (RECOMB 98)},
+  pages =	 {109--116},
+  publisher =	 {ACM Press},
+  year =	 1998,
+  editor =	 {S. Istrail and P. Pevzner and M. S. Waterman}
+}
+
 @Unpublished{HwangGreen04,
   author = 	 {D. G. Hwang and P. Green},
   title = 	 {Bayesian {M}arkov Chain {M}onte {C}arlo Sequence Analysis Reveals Varying Neutral Substitution Patterns in Mammalian Evolution},
@@ -9277,6 +9361,17 @@ YEAR = 1990}
   pmid =	 9927713,
 }
 
+
+@Article{Karplus05,
+  author =       {K. Karplus and R. Karchin and G. Shackelford and R. Hughey},
+  title =        {Calibrating {E}-Values for Hidden {M}arkov Models Using Reverse-Sequence Null Models},
+  journal =      {Bioinformatics},
+  year =         2005,
+  volume =       21,
+  pages =        {4107--4115},
+  pmid =	 16123115,
+}
+
 @TechReport{Kasami65,
   author = 	 {T. Kasami},
   title = 	 {An Efficient Recognition and Syntax Algorithm for
@@ -10016,12 +10111,11 @@ ANNOTE = "recE pathway, DSBR in coli"
   author = 	 {A. Krogh},
   title = 	 {Two Methods for Improving Performance of an {HMM}
                   and Their Application for Gene Finding},
-  journal = 	 ISMB97,
+  journal = 	 ISMB,
   year = 	 1997,
   volume =	 5,
   pages =	 {179-186},
   pmid =	 9322033,
-  muid =	 97463249
 }
 
 @InCollection{Krogh98,
@@ -10038,7 +10132,7 @@ ANNOTE = "recE pathway, DSBR in coli"
   author = 	 {A. Krogh and G. Mitchison},
   title = 	 {Maximum Entropy Weighting of Aligned Sequences of
                   Proteins or {DNA}},
-  journal = 	 ISMB95,
+  journal = 	 ISMB,
   year = 	 1995,
   volume =	 3,
   pages =	 {215-221}
@@ -10139,7 +10233,7 @@ YEAR = 1990}
   author = 	 {D. Kulp and D. Haussler and M. G. Reese and F. H. Eeckman},
   title = 	 {A Generalized Hidden {M}arkov Model for the
                   Recognition of Human Genes in {DNA}},
-  journal = 	 ISMB96,
+  journal = 	 ISMB,
   volume =       4,
   year =	 1996,
   pages =	 {134-141}
@@ -10698,24 +10792,22 @@ YEAR = 1984}
   pages =	 {400-404}
 }
 
-@InProceedings{Lefebvre95,
+@Article{Lefebvre95,
   author = 	 {Fabrice Lefebvre},
   title = 	 {An Optimized Parsing Algorithm Well Suited to {RNA} Folding},
-  booktitle = 	 ISMB95,
-  editor =	 {C. Rawlings and others},
+  journal = 	 ISMB,
+  volume =       3,
   year =	 1995,
-  publisher =	 {AAAI Press},
-  pages =        {222-230}
+  pages =        {222-230},
 }
 
-@InProceedings{Lefebvre96,
+@Article{Lefebvre96,
   author = 	 {Fabrice Lefebvre},
   title = 	 {A Grammar-Based Unification of Several Alignment and
                   Folding Algorithms},
-  booktitle = 	 ISMB96,
-  editor =	 {D. J. States and others},
+  booktitle = 	 ISMB,
+  volume =       4,
   year =	 1996,
-  publisher =	 {AAAI Press},
   pages =        {143-154}
 }
 
@@ -10733,7 +10825,7 @@ YEAR = 1984}
 
 @ARTICLE {Lemieux88,
 AUTHOR = "B. Lemieux and M. Turmel and C. Lemieux",
-TITLE = "Unidirectional Gene Converions in the Chloroplasts of 
+TITLE = "Unidirectional Gene Conversions in the Chloroplasts of 
 	 {C}hlamydomonas Interspecific Hybrids",
 JOURNAL = MGG,
 VOLUME = 212,
@@ -12422,6 +12514,16 @@ YEAR = 1990}
   pages =        {81-87},
 }
 
+@Article{Milosavljevic93,
+  author =       {A. Milosavljevi\'c and J. Jurka},
+  title =        {Discovering Simple {DNA} Sequences by the Algorithmic Significance Method},
+  journal =      CABIOS,
+  year =         1993,
+  volume =       9,
+  pages =        {407--411},
+  pmid =	 8402207,
+}
+
 @Article{Mishmar04,
   author =       {D. Mishmar and E. Ruiz-Pesini and M. Brandon and
                   D. C. Wallace},
@@ -13522,6 +13624,27 @@ YEAR = 1990}
   pmid =	 10642801,
 }
 
+@Article{Olsen99,
+  author = 	 {R. Olsen and T. Hwa and M. L\"{a}ssig},
+  title = 	 {Optimizing {S}mith-{W}aterman Alignments},
+  journal = 	 PSB,
+  year = 	 1999,
+  volume =	 4,
+  pages =	 {302--313},
+  pmid =	 10380206
+}
+
+@Article{Olsen99b,
+  author = 	 {R. Olsen and R. Bundschuh and T. Hwa},
+  title = 	 {Rapid Assessment of Extremal Statistics for Gapped
+                  Local Alignment},
+  journal = 	 ISMB,
+  year = 	 1999,
+  volume =	 7,
+  pages =	 {211-222},
+  pmid =	 10786304
+}
+
 @InCollection{Olson91,
   author = 	 {M. V. Olson},
   title = 	 {Genome Structure and Organization in \emph{{S}accharomyces cerevisiae}},
@@ -14024,6 +14147,17 @@ YEAR = 1990}
   year = 	 1992,
   volume =	 210,
   pages =	 {575-601}
+}
+
+@Article{Pearson05,
+  author = 	 {W. R. Pearson and M. L. Sierk},
+  title = 	 {The Limits of Protein Sequence Comparison?},
+  journal = 	 COSB,
+  year = 	 2005,
+  volume =	 15,
+  pages =	 {254--260},
+  filed =	 {Pearson},
+  pmid =	 15919194
 }
 
 @ARTICLE{Pedersen-Lane87,
@@ -16674,7 +16808,7 @@ YEAR = 1988}
   author = 	 {G. D. Stormo and D. Haussler},
   title = 	 {Optimally Parsing a Sequence Into Different Classes Based on Multiple
                   Types of Evidence},
-  journal = 	 {ISMB},
+  journal = 	 ISMB,
   year = 	 1994,
   volume =	 2,
   pages =	 {369-375},
@@ -17041,7 +17175,7 @@ YEAR = 1985}
   author = 	 {J. E. Tabaska and G. D. Stormo},
   title = 	 {Automated Alignment of {RNA} Sequences to
                   Pseudoknotted Structures},
-  journal = 	 ISMB97,
+  journal = 	 ISMB,
   year = 	 1997,
   volume =	 5,
   pages =	 {311-318}
@@ -19534,7 +19668,7 @@ ANNOTE = "lambda gt11 reference"}
 }
 
 @Article{YuHwa01,
-  author =       {Y. K. Yu and T. Hwa},
+  author =       {Y.-K. Yu and T. Hwa},
   title =        {Statistical Significance of Probabilistic Sequence
                   Alignment and Related Local Hidden Markov Models}, 
   journal =      JCompB,
@@ -19543,6 +19677,31 @@ ANNOTE = "lambda gt11 reference"}
   pages =        {249--282},
   filed =	 {Hwa},
   pmid =	 11535176,
+}
+
+@Article{YuHwa02,
+  author = 	 {Y.-K. Yu and R. Bundschuh and T. Hwa},
+  title = 	 {Hybrid alignment: high-performance with universal statistics},
+  journal = 	 {Bioinformatics},
+  year = 	 2002,
+  volume =	 18,
+  pages =	 {864--872},
+  filed =	 {Hwa},
+  pmid =	 12075022
+}
+
+@InCollection{YuHwa02b,
+  author = 	 {Y.-K. Yu and R. Bundschuh and T. Hwa},
+  title = 	 {Statistical Significance and Extremal Ensemble of
+                  Gapped Local Hybrid Alignment},
+  booktitle = 	 {Biological Evolution and Statistical Physics},
+  pages =	 {3--21},
+  publisher =	 {Springer-Verlag},
+  year =	 2002,
+  editor =	 {M. L\"{a}ssig and A. Valleriani},
+  volume =	 585,
+  series =	 {Lecture Notes in Physics},
+  address =	 {Berlin}
 }
 
 @Article{YuSteitz98,
