@@ -73,6 +73,9 @@ while (<>)
 	else {$title = $1; }
 	$intitle = 1;
     }
+
+    if ($title =~ /\.\s*$/) { last; } # test title for trailing, final period.
+
 }
 				# remove trailing period.
 if ($title =~ /^(.+)\.$/) { $title = $1; }
