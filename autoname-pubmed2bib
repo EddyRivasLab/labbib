@@ -1,0 +1,269 @@
+#! /usr/bin/perl
+# 
+# autoname_pubmed2bib
+# Eric Nawrocki
+# EPN, Sat Jul 11 10:49:18 2009
+#
+# Usage: perl autoname_pubmed2bib 
+#             <pubmed cite file '<s>.pubmed', I'll create '<s>.bib'>
+#
+#        OR 
+#
+#        perl autoname-pubmed2bib 
+#             <pubmed cite file '<s>.pubmed', I'll create '<s>.bib'> 
+#             <big .bib file to concatenate <s>.bib to>
+#
+# Description:
+# Generates a bibtex entry from a pubmed-formatted citation.
+# The pubmed citation file should only contain a single reference.
+# This script is a modified version of the script pubmed2bib, 
+# written by Sean Eddy. 
+#
+# The modifications are:
+#
+# 1. A new bibtex entry is automatically saved to a file called
+#    '<s>.bib', with <s> taken from the input <s>.pubmed file .
+#    This file is also printed to the screen.
+#    (note: input file must be named <s>'.pubmed')
+#    (pubmed2bib only writes it out to STDOUT)
+#
+# 2. The bibtex entry is automatically named '<s>'. 
+#    (pubmed2bib leaves the entry name as the empty string "")
+#
+#    For example, running on Woese77.pubmed would create a new 
+#    .bib file called Woese77.bib, the first line of which would
+#    be '@Article{Nadsidze09,'
+#    
+# 3. Optional automatic concatenation of the newly created '<s>.bib'
+#    to another .bib file. This is enabled using two command line 
+#    arguments instead of one. The second argument is the .bib file
+#    to concatenate to.
+#
+# Below this point is Sean's original notes.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 
+# Example of use:
+# ---------
+# > autoname_pubmed2bib
+# Biochimie 1996;78(5):302-310 
+#
+# Fully automated genome analysis that reflects user needs and preferences. A
+# detailed introduction to the MAGPIE system architecture.
+#
+# Gaasterland T, Sensen CW...
+#.
+# -------------
+# 
+# i.e. cut and paste the PubMed Web stuff in, then do a '.'
+# to end. A BibTeX entry is then printed, which can be cut and
+# pasted into the current bib file and edited further.
+#
+
+# First line is reference.
+#
+$usage = "autoname-pubmed2bib\n\t<pubmed cite file '<s>.pubmed', I'll create <s>.bib  w/article name <s>>\n";
+$usage .= "\tOR\n";
+$usage .= "autoname-pubmed2bib\n\t<pubmed cite file '<s>.pubmed', I'll create <s>.bib w/article name <s>>\n\t<big .bib file to concatenate <s>.bib to>\n";
+
+$name = "";
+$do_concat = 0;
+if(scalar(@ARGV) == 1) { 
+    $file = $ARGV[0]; 
+}
+elsif(scalar(@ARGV) == 2) { 
+    $file = $ARGV[0]; 
+    $big_bib_file_to_concat_to = $ARGV[1]; 
+    if(!(-e $big_bib_file_to_concat_to)) { die "ERROR can't concatenate to big .bib file: $big_bib_file_to_concat_to, it doesn't exist!"; }
+    $do_concat = 1;
+}
+else { printf("$usage\n"); exit(0); }
+
+if($file !~ m/\.pubmed$/) { die "ERROR, pubmed citation file $file must end in '.pubmed'\n"; }
+if($file =~ m/\//)        { die "ERROR, pubmed citation file $file may not include '\/' characters (must be in cwd)\n"; }
+$name = $file;
+$name =~ s/\.pubmed$//;
+
+if($name eq "") { die "ERROR, name is blank!\n"; }
+
+open(IN, $file) || die "ERROR couldn't open file $file"; 
+while (<IN>)
+{
+    #          (journal) (year)           (vol)
+    if (/^\d?:?\s*(.+) ([12][90]\d\d).*;\s*(\d+)\(?.*:\s*(\S?\d+)-(\d+)/)
+    {
+	$journal   = $1;
+	$year      = $2;
+	$volume    = $3;
+	$startpage = $4;
+	$endpage   = $5;
+	last;
+    }
+    # Single page (epub) style: BMC Bioinformatics, PLoS Biology
+    #       (journal)   (year)           (vol) 
+    elsif (/^\d?:?\s*(.+) ([12][90]\d\d).*;\s*(\d+)\(?.*:\s*([Ee]?\d+)/)
+    {
+	$journal   = $1;
+	$year      = $2;
+	$volume    = $3;
+	$startpage = $4;
+	$endpage   = -1;
+	last;
+    }
+}
+
+				# This little trick turns e.g. "2185-95" into 2185-2195.
+if (($endpage != -1) && ($diff = length($startpage) - length($endpage)) > 0) {
+    $endpage = substr($startpage, 0, $diff) . $endpage;
+}
+#print "REF $journal ($year) $volume:$startpage-$endpage\n" ;
+
+
+# Next line(s) is title; concatenate before further processing.
+#
+$intitle = 0;
+while (<IN>)
+{
+    if (/^\s*Related Articles, /) { next; } # skip the link line
+    if (/^\s*Books, /)            { next; } # skip the link line - rare case, new article
+    if (/^\s*\[.*\]\s*$/)           { next;}  # skip [] image crap
+    if (/^\s*$/) {	               # skip blank lines until we reach title
+	if ($intitle) { last; } else { next; }
+    }
+    if (/^\s*Click here to read\s*/)   { next; }
+    if (/^\s*Comment [oi]n:\s*$/)      { next; }
+    if (/^\s*Erratum in:\s*$/)         { next; }
+    if (/;\d+\(\d+\):\d+/)             { next; } 
+
+    chop;
+    if (/^\s*(.+)$/) {
+	if ($intitle) { $title = $title." ".$1; }
+	else {$title = $1; }
+	$intitle = 1;
+    }
+
+    if ($title =~ /\.\s*$/) { last; } # test title for trailing, final period.
+
+}
+				# remove trailing period.
+if ($title =~ /^(.+)\.$/) { $title = $1; }
+$title = process_title($title);
+#print "TITLE $title\n" ;
+
+
+
+# Next line(s) is authors. Concatenate before processing.
+# New pubmed has one author/line, w/ leading "*" on each line (Sept 2006)
+$inauthor   = 0;
+$authorline = "";
+while (<IN>)
+{
+    if (/^\s*$/) {	               # skip blank lines until we reach authors
+	if ($inauthor) { last; } else { next; }
+    }
+    elsif (/^\s*\*\s+(.+)$/) {	# new style: remove the * items.
+	$authorline = $authorline." ".$1;
+	$inauthor = 1;
+    }
+    elsif (/^\s*(.+)$/) {
+	$authorline = $authorline." ".$1;
+	$inauthor = 1;
+    }
+}   
+@authors = split(/,/, $authorline);
+#foreach $author (@authors) {
+#    print "AUTHOR = \"$author\"\n";
+#}
+    
+# Wait for .
+#	
+
+if (! /^\./) {
+    while (<IN>)
+    {
+	if (/^\s*PMID:\s*(\d+)/) {$pmid = $1; }
+	if (/^\./) { last; }
+    }
+}
+close(IN);
+# Output.
+#
+$out_file = $name . ".bib";
+open(OUT, (">" . $out_file)) || die "ERROR opening output file $out_file\n";
+
+print OUT "\@Article{$name,\n";
+print OUT "  author =       {";
+$ok = 0;
+foreach $author (@authors) {
+    if ($ok) { print OUT " and "; }
+    ($surname, $initials) = $author =~ /^\s*(.+) ([A-Z]+)\.?$/;
+    $initials =~ s/[A-Z]/$&. /g;
+    print OUT "$initials$surname";
+    $ok = 1;
+}
+print OUT "},\n";
+print OUT "  title =        {$title},\n";
+print OUT "  journal =      {$journal},\n";
+print OUT "  year =         $year,\n";
+print OUT "  volume =       $volume,\n";
+if ($endpage != -1) {
+    print OUT "  pages =        {$startpage--$endpage},\n";
+} else {
+    print OUT "  pages =        {$startpage},\n";
+}
+print OUT "  OPTfiled  =    {},\n";
+print OUT "  OPTmynote =    {},\n";
+print OUT "  OPTpmid =      $pmid,\n";
+print OUT "}\n"; 
+close(OUT);
+print ("\n***Created file $out_file, cat'ed below:\n\n");
+system("cat $out_file");
+
+if($do_concat) { 
+    $big_bib_file_copy = "bib_bkup.txt";
+    system("cp $big_bib_file_to_concat_to $big_bib_file_copy");
+    print ("\n***Saved copy of original $big_bib_file_to_concat_to to $big_bib_file_copy\n");
+    system("cat $out_file >> $big_bib_file_to_concat_to");
+    print ("***Concatenated $out_file to $big_bib_file_to_concat_to\n\n");
+}
+			     
+sub process_title
+{
+    my ($title) = @_;
+    my @words;
+    my $i, $j;
+
+    # Remove crap
+    $title =~ s/Click here to read //g;
+
+    @words = split(' ', $title);
+    $title = "";
+    for ($i = 0; $i <= $#words; $i++) 
+    {
+	if ($i > 0) { $title .= " "; }
+	@subword = split('-', $words[$i]);
+	$words[$i] = "";
+	for ($j = 0; $j <= $#subword; $j++) {
+	    if ($j > 0) { $words[$i] .= "-" };
+	    $subword[$j] = &process_word($subword[$j]);
+	    $words[$i] .= $subword[$j];
+	}
+	$title .= $words[$i];
+    }
+    return $title;
+}
+
+sub process_word
+{
+    my ($word) = @_;
+
+    if ($word =~ /[A-Z]\S*[A-Z]/) {
+	$word = "{$word}";
+    } 
+    elsif (length($word) >= 4) {
+	$word = ucfirst($word);
+    }
+    return $word;
+}
+		
+ 
+
