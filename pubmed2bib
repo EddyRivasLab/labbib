@@ -48,7 +48,7 @@ while (<>)
 if (($endpage != -1) && ($diff = length($startpage) - length($endpage)) > 0) {
     $endpage = substr($startpage, 0, $diff) . $endpage;
 }
-#print "REF $journal ($year) $volume:$startpage-$endpage\n" ;
+print "REF $journal ($year) $volume:$startpage-$endpage\n" ;
 
 
 # Next line(s) is title; concatenate before further processing.
@@ -56,6 +56,7 @@ if (($endpage != -1) && ($diff = length($startpage) - length($endpage)) > 0) {
 $intitle = 0;
 while (<>)
 {
+	
     if (/^\s*Related Articles, /) { next; } # skip the link line
     if (/^\s*Books, /)            { next; } # skip the link line - rare case, new article
     if (/^\s*\[.*\]\s*$/)           { next;}  # skip [] image crap
@@ -72,6 +73,7 @@ while (<>)
 	if ($intitle) { $title = $title." ".$1; }
 	else {$title = $1; }
 	$intitle = 1;
+
     }
 
     if ($title =~ /\.\s*$/) { last; } # test title for trailing, final period.
