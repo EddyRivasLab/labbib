@@ -18,7 +18,7 @@ if ($opt_u) { $do_justone = 1;}
 
 $search = shift;
 @bibpaths = split(':',$BIBINPUTS); 
-$/ = "";
+$/ = "";	
 
 foreach $bibpath (@bibpaths) {
     if ($bibpath eq "") { $bibpath = "."; }

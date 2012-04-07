@@ -34,7 +34,7 @@ while (<DATABASE>)
 close(BACKUP);
 close(DATABASE);
 
-$/ = "";			# paragraph mode
+$/ = "";
 open(DATABASE,$database) || die("Can't open database $database");
 while (<DATABASE>)
 {
