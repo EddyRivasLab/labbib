@@ -42,13 +42,22 @@ while (<>)
 	$endpage   = -1;
 	last;
     }
+    # [Epub ahead of print] style
+    elsif (/^\d?:?\s*(.+) ([12][90]\d\d).*\[Epub/)
+    {
+	$journal   = $1;
+	$year      = $2;
+	$volume    = -1;
+	$startpage = -1;
+	$endpage   = -1;
+	last;
+    }
 }
 
 				# This little trick turns e.g. "2185-95" into 2185-2195.
 if (($endpage != -1) && ($diff = length($startpage) - length($endpage)) > 0) {
     $endpage = substr($startpage, 0, $diff) . $endpage;
 }
-print "REF $journal ($year) $volume:$startpage-$endpage\n" ;
 
 
 # Next line(s) is title; concatenate before further processing.
@@ -87,7 +96,6 @@ $title = process_title($title);
 
 
 # Next line(s) is authors. Concatenate before processing.
-# New pubmed has one author/line, w/ leading "*" on each line (Sept 2006)
 $inauthor   = 0;
 $authorline = "";
 while (<>)
@@ -95,34 +103,31 @@ while (<>)
     if (/^\s*$/) {	               # skip blank lines until we reach authors
 	if ($inauthor) { last; } else { next; }
     }
-    elsif (/^\s*\*\s+(.+)$/) {	# new style: remove the * items.
-	$authorline = $authorline." ".$1;
-	$inauthor = 1;
-    }
     elsif (/^\s*(.+)$/) {
 	$authorline = $authorline." ".$1;
+	if (/\.\s*$/) { last; }	      # author list ends with period '.'.
 	$inauthor = 1;
     }
 }   
 @authors = split(/,/, $authorline);
+
 #foreach $author (@authors) {
 #    print "AUTHOR = \"$author\"\n";
 #}
     
-# Wait for .
-#	
-
-if (! /^\./) {
-    while (<>)
-    {
-	if (/^\s*PMID:\s*(\d+)/) {$pmid = $1; }
-	if (/^\./) { last; }
-    }
+# Find the PMID.
+while (<>)
+{
+    if    (/^\s*PMID:\s*(\d+)/)       {$pmid = $1;     } # PMID xxxxxx case (on same line)
+    elsif (/^\s*PMID:/)               {$find_pmid = 1; } # PMID\n xxxxxx case (on next line)
+    elsif ($find_pmid && /^\s*(\d+)/) {$pmid = $1; $find_pmid = 0; }
+    elsif (/^\./) { last; }
 }
+
+
 
 # Output.
 #
-
 print "\@Article{,\n";
 print "  author =       {";
 $ok = 0;
