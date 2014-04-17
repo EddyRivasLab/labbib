@@ -32,8 +32,9 @@ while (<>)
 	last;
     }
     # Single page (epub) style: BMC Bioinformatics, PLoS Biology
-    #       (journal)   (year)           (vol) 
-    elsif (/^\d?:?\s*(.+) ([12][90]\d\d).*;\s*(\d+)\(?.*:\s*([Ee]?\d+)/)
+    #          (journal)   (year)             (vol) 
+    elsif (/^\d?:?\s*(.+) ([12][90]\d\d).*;\s*(\d+)\(\d+\):\s*([Ee]?\d+)/ ||   # volume with (number)
+	   /^\d?:?\s*(.+) ([12][90]\d\d).*;\s*(\d+):\s*([Ee]?\d+)/)            # or without
     {
 	$journal   = $1;
 	$year      = $2;
@@ -133,9 +134,11 @@ print "  author =       {";
 $ok = 0;
 foreach $author (@authors) {
     if ($ok) { print " and "; }
-    ($surname, $initials) = $author =~ /^\s*(.+) ([A-Z]+)\.?$/;
+    if    ($author =~ /^\s*(.+) ([A-Z]+)\d?\.?$/)        { $surname = $1;       $initials = $2; $jr_opt = ""; }  # \d allows for the new pubmed superscript, footnoting affiliation
+    elsif ($author =~ /^\s*(.+) ([A-Z]+)( \S+?)\d?\.?$/) { $surname = $1;       $initials = $2; $jr_opt = $3; }  # Watch out for Jr, III, etc.
+    else                                                 { $surname = "FIXME!"; $initials = "", $jr_opt = ""; }
     $initials =~ s/[A-Z]/$&. /g;
-    print "$initials$surname";
+    print "$initials$surname$jr_opt";
     $ok = 1;
 }
 print "},\n";
