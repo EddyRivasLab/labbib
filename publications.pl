@@ -40,7 +40,7 @@ binmode STDOUT, ":encoding(UTF-8)";
 print $html;
 
 sub usage {
-  print qq($0 [options] <bibfiles>
+  print qq|($0 [options] <bibfiles>
 
   Creates an HTML lists of publications based on the data in your
   local lab.bib and labweb.bib files.
@@ -49,19 +49,22 @@ sub usage {
   the default lab.bib and labweb.bib files to store our bibtex data.
 
   options:
-    -h, --help                    : Print this message and exit
-    -l <dir>, --labbib_dir=<dir>  : The directory that contains all the bibtex files.
-                                    [default: $ENV{HOME}/labbib ]
-    -p <dir>, --pubs_dir=<dir>    : Path to the publications directory that contains pdfs
-                                    and supplemental material.
-                                    [default: $ENV{HOME}/selab/publications ]
-    -k <regex>, --keyword=<regex> : Limit the output to entries that match the keyword input
-                                    eg: [hmmer]
-    -t <type>, --type=<type>      : Limit the output to the selected entry type. eg [ARTICLE]
-    -n, --nodividers              : Turn off the dividers between years
-    -u <url>, --url=<url>         : The base url for the site. eg [http://selab.janelia.org]
-    -i <index>, --index=<index>   : Limit results to an article key. eg [Eddy01].
-);
+    -h, --help                     : Print this message and exit
+    -l <dir>, --labbib_dir=<dir>   : The directory that contains all the bibtex files.
+                                     [default: $ENV{HOME}/labbib ]
+    -p <dir>, --pubs_dir=<dir>     : Path to the publications directory that contains pdfs
+                                     and supplemental material.
+                                     [default: $ENV{HOME}/selab/publications ]
+    -k <string>, --keyword=<string>: Limit the output to entries that match the keyword input.
+                                     This is entered as a boolean search string. examples:
+                                     'hmmer AND lab'
+                                     '(lab NOT hmmer) AND recent'
+                                     'NOT lab'
+    -t <type>, --type=<type>       : Limit the output to the selected entry type. eg [ARTICLE]
+    -n, --nodividers               : Turn off the dividers between years
+    -u <url>, --url=<url>          : The base url for the site. eg [http://selab.janelia.org]
+    -i <index>, --index=<index>    : Limit results to an article key. eg [Eddy01].
+|;
 
   exit 1;
 }

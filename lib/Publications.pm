@@ -7,6 +7,7 @@ use BibTeX::HTMLParser;
 use IO::String;
 use File::Slurp;
 use Template;
+use Search::QueryParser;
 
 sub new {
   my ($class, %args) = @_;
@@ -74,6 +75,49 @@ sub labweb {
   return $self->{_labweb};
 }
 
+sub keyword_check {
+  my ($self, $query, $keywords) = @_;
+  my @result = ();
+  my %prefix_map = (
+    '+' => 'and ',
+    ''  => 'or ',
+    '-' => 'and !',
+  );
+
+  my $count = 0;
+  foreach my $prefix ('+', '', '-') {
+    next if not $query->{$prefix};
+    foreach (@{$query->{$prefix}}) {
+      $count++;
+      my $string = $self->build_sub_keyword($_, $keywords);
+
+      if ($count > 1) {
+        push @result, $prefix_map{$prefix} . $string;
+      }
+      else {
+        push @result, $string;
+      }
+    }
+  }
+
+  my $result_string = join ' ', @result;
+  return $result_string;
+}
+
+sub build_sub_keyword {
+  my ($self, $subquery, $keywords) = @_;
+  return "(" . $self->keyword_check($subquery->{value}, $keywords) . ")" if $subquery->{op} eq '()';
+
+  my $result = 0;
+  for my $keyword (@$keywords) {
+    if ($keyword eq $subquery->{value}) {
+      $result = 1;
+      last;
+    }
+  }
+  return $result;
+}
+
 sub get_publications {
   my ($self, %args) = @_;
 
@@ -90,20 +134,25 @@ sub get_publications {
 
   my $count = 0;
 
+  my $query = undef;
+  my $prefix = q{};
+
+  if ($args{keyword}) {
+    my $qp = Search::QueryParser->new();
+    if ($args{keyword} =~ s/^\s*NOT//) {
+      $prefix = '!';
+    }
+    $query = $qp->parse($args{keyword}) or die "Error in provided keyword string: " . $qp->err;
+  }
+
   while (my $entry = $parser->next) {
     if ($entry->parse_ok) {
       if ($args{keyword}) {
-        my $keywords = $entry->field('lab_keywords');
-        next unless $keywords;
-        my @keywords = split ',', $entry->field('lab_keywords');
-        my $found = 0;
-        for my $word (@keywords) {
-          if ($word =~ /$args{keyword}/ ) {
-            $found++;
-            last;
-          }
-        }
-        next unless ($found);
+        my $keywords = $entry->field('lab_keywords') || '';
+        my @keywords = split ',', $keywords;
+        my $args = $self->keyword_check($query, \@keywords);
+        $args = "$prefix($args)";
+        next unless (eval $args);
       }
       if ($args{index} && $entry->key !~ /$args{index}/) {
         next;
@@ -111,7 +160,6 @@ sub get_publications {
       if ($entry->type =~ $type) {
         $entry->pubsdir($self->pubs_dir);
         $entry->pubsurl($self->url);
-        #use DDP {class => {inherited => 'public' } }; p $entry;
         push @entries, $entry;
         $types{$entry->type}++;
         $count++;
