@@ -78,12 +78,22 @@ sub labweb {
 sub keyword_check {
   my ($self, $query, $keywords) = @_;
   my @result = ();
+  # The query parsing code outputs the symbols +,- and ''. We need to
+  # convert these into keywords that perl understands in conditional
+  # statements, so we use this map to do that.
   my %prefix_map = (
     '+' => 'and ',
     ''  => 'or ',
     '-' => 'and !',
   );
 
+  # The count is used to determine if we are at the beginning of a statement
+  # or somewhere else. We use the count later to decide if we need to add
+  # the prefix to the string. Adding a prefix to the beginning of a statement
+  # results in a string like this "+keyword +keyword" which, after substitution
+  # through the prefix map, becomes "and keyword and keyword", which breaks
+  # in the eval(). Removing it fixes the problem and doesn't hurt the results in
+  # my test cases.
   my $count = 0;
   foreach my $prefix ('+', '', '-') {
     next if not $query->{$prefix};
@@ -108,6 +118,11 @@ sub build_sub_keyword {
   my ($self, $subquery, $keywords) = @_;
   return "(" . $self->keyword_check($subquery->{value}, $keywords) . ")" if $subquery->{op} eq '()';
 
+  # Simply look through the list of keywords and if we find a match
+  # return true. This converts our search string from something like
+  # "hmmer AND infernal" to "1 and 0" which is perfectly acceptable in
+  # a conditional check. It also means that we can't inject nasty
+  # things into the eval statement later on.
   my $result = 0;
   for my $keyword (@$keywords) {
     if ($keyword eq $subquery->{value}) {
@@ -137,6 +152,9 @@ sub get_publications {
   my $query = undef;
   my $prefix = q{};
 
+  # this block of code parses a boolean search string and breaks it down
+  # into a data structure ($query) that can be used to generate a much
+  # simpler string that gets created and checked with each entry.
   if ($args{keyword}) {
     my $qp = Search::QueryParser->new();
     if ($args{keyword} =~ s/^\s*NOT//) {
@@ -150,6 +168,9 @@ sub get_publications {
       if ($args{keyword}) {
         my $keywords = $entry->field('lab_keywords') || '';
         my @keywords = split ',', $keywords;
+        # takes the query data structure we generated earlier and recurses
+        # down that to generate a simple boolean statement that gets evaluated
+        # in an unless statement below.
         my $args = $self->keyword_check($query, \@keywords);
         $args = "$prefix($args)";
         next unless (eval $args);
