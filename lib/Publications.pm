@@ -15,7 +15,7 @@ sub new {
     _labbib_dir => $ENV{HOME}."/labbib",
     _pubs_dir   => "publications",
     _url        => "http://selab.janelia.org",
-    _labbib     => "lab.bib",
+    _bibfile    => "lab.bib",
     _labweb     => "labweb.bib",
   };
   bless $self, $class;
@@ -59,12 +59,12 @@ sub url {
   return $self->{_url};
 }
 
-sub labbib {
+sub bibfile {
   my ($self, $new) = @_;
   if ($new) {
-    $self->{_labbib} = $new;
+    $self->{_bibfile} = $new;
   }
-  return $self->{_labbib};
+  return $self->{_bibfile};
 }
 
 sub labweb {
@@ -141,7 +141,7 @@ sub get_publications {
   my $type   = qr{.*};
 
   my $strings = read_file($self->labbib_dir . "/" . $self->labweb);
-  my $entries = read_file($self->labbib_dir . "/" . $self->labbib);
+  my $entries = read_file($self->labbib_dir . "/" . $self->bibfile);
   my $fh      = IO::String->new($strings . $entries);
   my $parser = BibTeX::HTMLParser->new($fh);
 

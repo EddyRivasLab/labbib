@@ -25,6 +25,10 @@ if (exists $opts->{help}) {
   usage();
 }
 
+if ($ARGV[0]) {
+  $opts->{bibfile} = $ARGV[0];
+}
+
 my $pubs = Publications->new(%$opts);
 
 my $html = $pubs->get_publications(
