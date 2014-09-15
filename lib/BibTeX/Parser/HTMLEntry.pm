@@ -101,6 +101,9 @@ sub reprint_link {
   } elsif ($url && $url =~ /reprint\.p(s|df)$/) {
     $link = qq(<a href="$url"><span class="glyphicon glyphicon-file"></span> reprint</a>);
   }
+  elsif ($url) {
+    $link = qq(<a href="$url"><span class="glyphicon glyphicon-file"></span> reprint</a>);
+  }
   return $link;
 }
 
