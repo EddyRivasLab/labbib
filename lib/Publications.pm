@@ -17,6 +17,7 @@ sub new {
     _url        => "http://selab.janelia.org",
     _bibfile    => "lab.bib",
     _labweb     => "labweb.bib",
+    _template   => "default",
   };
   bless $self, $class;
   for my $k (keys %args) {
@@ -25,6 +26,14 @@ sub new {
     }
   }
   return $self;
+}
+
+sub template {
+  my ($self, $new) = @_;
+  if ($new) {
+    $self->{_template} = $new;
+  }
+  return $self->{_template};
 }
 
 sub labbib_dir {
@@ -202,7 +211,14 @@ sub get_publications {
 
   my $text = '';
   my $template = Template->new(OUTPUT => \$text);
-  $template->process(\*DATA, $vars) || die $template->error();
+
+  if ($self->template eq 'default') {
+    $template->process(\*DATA, $vars) || die $template->error();
+  }
+  else {
+    #slurp in the template file provided
+    $template->process('selab.tt', $vars) || die $template->error();
+  }
   $text =~ s|\\emph{(.*)}|<em>$1</em>|g;
   return $text;
 

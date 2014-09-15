@@ -66,7 +66,7 @@ sub pubmedlink {
   my $self = shift;
   my $pmid = $self->field('pmid');
   if ($pmid) {
-    return qq|<a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=PubMed&cmd=Retrieve&list_uids=$pmid&dopt=Abstract">[abstract]</a>|;
+    return qq|<a href="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=PubMed&cmd=Retrieve&list_uids=$pmid&dopt=Abstract"><span class="glyphicon glyphicon-globe"></span> abstract</a>|;
   }
   else {
     warn $self->type . ": " . $self->key  . " is missing a pmid\n";
@@ -97,9 +97,9 @@ sub reprint_link {
   my $link = undef;
   my $url  = $self->local_reprint_url;
   if ($url && $url =~ /preprint\.p(s|df)$/) {
-    $link = qq(<a href="$url">[preprint]</a>);
+    $link = qq(<a href="$url"><span class="glyphicon glyphicon-file"></span> preprint</a>);
   } elsif ($url && $url =~ /reprint\.p(s|df)$/) {
-    $link = qq(<a href="$url">[reprint]</a>);
+    $link = qq(<a href="$url"><span class="glyphicon glyphicon-file"></span> reprint</a>);
   }
   return $link;
 }

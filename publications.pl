@@ -17,6 +17,7 @@ GetOptions(
   'count:i',
   'type:s',
   'keyword:s',
+  'template:s',
   'index:s',
   'url:s',
 ) or usage();
@@ -64,10 +65,15 @@ sub usage {
                                      'hmmer AND lab'
                                      '(lab NOT hmmer) AND recent'
                                      'NOT lab'
-    -t <type>, --type=<type>       : Limit the output to the selected entry type. eg [ARTICLE]
+    --type=<type>                  : Limit the output to the selected entry type. eg [ARTICLE]
     -n, --nodividers               : Turn off the dividers between years
     -u <url>, --url=<url>          : The base url for the site. eg [http://selab.janelia.org]
     -i <index>, --index=<index>    : Limit results to an article key. eg [Eddy01].
+    --template=<template>          : should point to an alternative template to be used for
+                                     displaying the processed articles. The <template> value
+                                     should be the name of the template file with no path
+                                     information. The script expects this template to be in the
+                                     directory it is executed in.
 |;
 
   exit 1;
