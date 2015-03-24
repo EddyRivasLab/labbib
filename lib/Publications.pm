@@ -235,7 +235,7 @@ __DATA__
   <a href="[% title_link %]" id="[% entry.key %]">
 [%- END -%]
 [% entry.cleaned('title') %]
-[%- IF title_link %]</a>.[%- END -%]
+[%- IF title_link %]</a>. [%- ELSE -%]. [%- END -%]
 [%- END -%]
 [%- BLOCK notes -%]
 <div>
