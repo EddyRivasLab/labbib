@@ -28,6 +28,11 @@ sub pubsurl {
   return $self->{_pubsurl};
 }
 
+sub root_url {
+  my $self = shift;
+  return $self->pubsurl || '/';
+}
+
 sub cleaned {
   my ($self, $field) = @_;
   my $text = $self->field($field);
@@ -111,13 +116,14 @@ sub local_reprint_url {
   my ($self, $count) = @_;
   unless (exists $self->{_local_reprint_url}) {
     my $key = $self->key;
+    my $root = $self->root_url;
     # open up the publications directory for this entry and look
     # for a .pdf or .ps file.
     # if we find one, create the link for it and cache it.
     foreach my $doctype (@{$self->doctypes}) {
       my $path = "./site/" . $self->pubsdir . "/$key/$key-$doctype";
       if ( -f $path ) {
-        my $url = "/" . $self->pubsdir . "/$key/$key-$doctype";
+        my $url = $root . $self->pubsdir . "/$key/$key-$doctype";
         $self->{_local_reprint_url} =  $url;
         last;
       }
@@ -153,7 +159,7 @@ sub links {
         my $text = $2;
 
         if ($label !~ /_URL$/) {
-          $url = "/" . $self->pubsdir . "/$key/$url";
+          $url = $self->root_url . $self->pubsdir . "/$key/$url";
         }
 
         push @{$links{$label}}, {
