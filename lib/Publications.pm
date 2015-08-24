@@ -14,7 +14,7 @@ sub new {
   my $self = {
     _labbib_dir => $ENV{HOME}."/labbib",
     _pubs_dir   => "publications",
-    _url        => "http://selab.janelia.org",
+    _url        => "http://eddylab.org/",
     _bibfile    => "lab.bib",
     _labweb     => "labweb.bib",
     _template   => "default",
@@ -270,16 +270,16 @@ __DATA__
 
 [%- IF entry.type == 'ARTICLE' -%]
 <li>
-[%- PROCESS title -%]
+[%- PROCESS title -%] <br />
 [%- FOREACH author IN entry.cleaned_author -%]
   [% author.first %] [% author.last %][% IF ! loop.last %],[% END %]
-[%- END -%].
+[%- END -%]. <br />
 <em>[% entry.cleaned_field('journal') %]</em>,
 [% IF entry.volume && entry.pages %][% entry.volume %]:[% entry.pages %],[% END %]
-[% entry.year %].
+[% entry.year %]. <br />
+[%- PROCESS notes -%]
 [% entry.pubmedlink %]
 [% entry.reprint_link -%]
-[%- PROCESS notes -%]
 </li>
 
 [%- ELSIF entry.type == 'PHDTHESIS' -%]
@@ -353,13 +353,13 @@ Masters Thesis: [%entry.school %], [% entry.year %].
 
 [%- ELSIF entry.type == 'UNPUBLISHED' -%]
 <li>
-[%- PROCESS title -%]
+[%- PROCESS title -%] <br />
 [%- FOREACH author IN entry.cleaned_author -%]
   [% author.first %] [% author.last %][% IF ! loop.last %],[% END %]
-[%- END -%].
-[% entry.note %], [% entry.year %].
-[% entry.reprint_link -%]
+[%- END -%]. <br />
+[% entry.note %], [% entry.year %]. <br />
 [%- PROCESS notes -%]
+[% entry.reprint_link -%]
 </li>
 
 [%- END -%]
