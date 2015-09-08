@@ -67,7 +67,7 @@ sub usage {
                                      'NOT lab'
     --type=<type>                  : Limit the output to the selected entry type. eg [ARTICLE]
     -n, --nodividers               : Turn off the dividers between years
-    -u <url>, --url=<url>          : The base url for the site. eg [http://selab.janelia.org]
+    -u <url>, --url=<url>          : The base url for the site. eg [http://eddylab.org]
     -i <index>, --index=<index>    : Limit results to an article key. eg [Eddy01].
     --template=<template>          : should point to an alternative template to be used for
                                      displaying the processed articles. The <template> value
