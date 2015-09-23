@@ -9,10 +9,11 @@
 #
 # SRE, Tue Mar 11 14:01:47 1997
 
-require "getopts.pl";
-require "importenv.pl";
+use Getopt::Std;
+use Env;
 
-&Getopts("uk");
+
+&getopts("uk");
 if ($opt_k) { $do_citekey = 1;}
 if ($opt_u) { $do_justone = 1;}
 
