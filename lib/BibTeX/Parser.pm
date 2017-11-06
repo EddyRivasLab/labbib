@@ -84,7 +84,7 @@ sub _parse_next {
             pos($_) = $pos;
 
             if ( $type eq "STRING" ) {
-                if (/\G{\s*($re_name)\s*=\s*/cgo) {
+                if (/\G\{\s*($re_name)\s*=\s*/cgo) {
                     my $key   = $1;
                     my $value = _parse_string( $self->{strings} );
                     if ( defined $self->{strings}->{$key} ) {

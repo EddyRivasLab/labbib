@@ -219,7 +219,7 @@ sub get_publications {
     #slurp in the template file provided
     $template->process('selab.tt', $vars) || die $template->error();
   }
-  $text =~ s|\\emph{(.*)}|<em>$1</em>|g;
+  $text =~ s|\\emph\{(.*)\}|<em>$1</em>|g;
   return $text;
 
 }
