@@ -342,10 +342,10 @@ Masters Thesis: [%entry.school %], [% entry.year %].
 
 [%- ELSIF entry.type == 'TECHREPORT' -%]
 <li>
-[%- PROCESS title -%]
+[%- PROCESS title -%] <br />
 [%- FOREACH author IN entry.cleaned_author -%]
   [% author.first %] [% author.last %][% IF ! loop.last %],[% END %]
-[%- END -%].
+[%- END -%]. <br />
 [% entry.year %]
 [% entry.reprint_link -%]
 [%- PROCESS notes -%]
