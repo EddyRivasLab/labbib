@@ -345,8 +345,8 @@ Masters Thesis: [%entry.school %], [% entry.year %].
 [%- PROCESS title -%] <br />
 [%- FOREACH author IN entry.cleaned_author -%]
   [% author.first %] [% author.last %][% IF ! loop.last %],[% END %]
-[%- END -%]. <br />
-[% entry.year %]
+[%- END -%],
+[% entry.year %]. <br />
 [% entry.reprint_link -%]
 [%- PROCESS notes -%]
 </li>
