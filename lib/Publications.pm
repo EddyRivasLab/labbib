@@ -284,11 +284,11 @@ __DATA__
 
 [%- ELSIF entry.type == 'PHDTHESIS' -%]
 <li>
-<em>[%- PROCESS title -%]</em>
+<em>[%- PROCESS title -%]</em> <br />
 [%- FOREACH author IN entry.cleaned_author -%]
   [% author.first %] [% author.last %][% IF ! loop.last %],[% END %]
-[%- END -%].
-PhD Thesis:[% entry.field('school') %], [% entry.year %].
+[%- END -%]. <br />
+PhD Thesis, [% entry.field('school') %], [% entry.year %]. <br />
 [% entry.reprint_link -%]
 [%- PROCESS notes -%]
 </li>
