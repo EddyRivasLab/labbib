@@ -219,7 +219,7 @@ sub get_publications {
     #slurp in the template file provided
     $template->process('selab.tt', $vars) || die $template->error();
   }
-  $text =~ s|\\emph{(.*)}|<em>$1</em>|g;
+  $text =~ s|\\emph\{(.*)\}|<em>$1</em>|g;
   return $text;
 
 }
@@ -284,11 +284,11 @@ __DATA__
 
 [%- ELSIF entry.type == 'PHDTHESIS' -%]
 <li>
-<em>[%- PROCESS title -%]</em>
+<em>[%- PROCESS title -%]</em> <br />
 [%- FOREACH author IN entry.cleaned_author -%]
   [% author.first %] [% author.last %][% IF ! loop.last %],[% END %]
-[%- END -%].
-PhD Thesis:[% entry.field('school') %], [% entry.year %].
+[%- END -%]. <br />
+PhD Thesis, [% entry.field('school') %], [% entry.year %]. <br />
 [% entry.reprint_link -%]
 [%- PROCESS notes -%]
 </li>
@@ -342,11 +342,11 @@ Masters Thesis: [%entry.school %], [% entry.year %].
 
 [%- ELSIF entry.type == 'TECHREPORT' -%]
 <li>
-[%- PROCESS title -%]
+[%- PROCESS title -%] <br />
 [%- FOREACH author IN entry.cleaned_author -%]
   [% author.first %] [% author.last %][% IF ! loop.last %],[% END %]
-[%- END -%].
-[% entry.year %]
+[%- END -%],
+[% entry.year %]. <br />
 [% entry.reprint_link -%]
 [%- PROCESS notes -%]
 </li>

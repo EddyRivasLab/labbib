@@ -45,7 +45,7 @@ sub cleaned {
 
 sub _remove_escape_formats {
   my ($self, $input) = @_;
-  $input =~ s|\\emph{(.*?)}|<em>$1</em>|g;
+  $input =~ s|\\emph\{(.*?)\}|<em>$1</em>|g;
   return $input;
 }
 
