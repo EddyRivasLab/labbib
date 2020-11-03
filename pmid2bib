@@ -1,0 +1,121 @@
+#! /usr/bin/env python3
+
+# pmid2bib - given a PubMed id, fetch article data using NCBI e-utils, and format for BibTeX.
+#
+# You'll still need to add a key, and also do some manual editing, especially of capitalization.
+#
+# Usage:
+#     pmid2bib <pmid> | pbcopy
+#
+
+import sys
+import getopt
+import urllib.request
+import re
+import json
+import string
+
+usage    = "pmid2bib <pmid>"
+pmid_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={0}&retmode=json"
+#testfile = "foo.test"
+
+# Process command line args and options
+#
+try:
+    (opts, args) = getopt.getopt(sys.argv[1:], "")
+except:
+    sys.exit("Failed to parse command line.\nUsage: {}".format(usage))
+if len(args) != 1:
+    sys.exit("Incorrect command line usage.\nUsage: {}".format(usage))
+pmid = args[0]
+
+
+
+################################################################
+# functions for converting fields from NCBI JSON to BibTeX 
+################################################################
+
+# Title
+# Example JSON:   "title": "CDD/SPARCLE: the conserved domain database in 2020."
+#
+# We strip the trailing period.
+#
+# (And someday, we should fix capitalization.)
+#
+def process_title(title):
+    title = title.rstrip('.')
+    return title
+
+# Author
+#
+# JSON has 'authors' as a list of dicts:
+#  { "authtype": "Author",
+#    "clusterid": "",
+#    "name": "Lu S" },
+#  { "authtype": "Author",
+#     "clusterid": "",
+#     "name": "Wang J"
+#  }, ....
+#
+# We convert into an `and` separated string with initials first, with periods:
+#  "S. Lu and J. Wang and ..."
+#
+def process_authors(authorlist):
+    author = []
+    for a in authorlist:
+        m = re.fullmatch(r'(\S+)\s+([A-Z]+)', a['name'])
+        if m:
+            surname  = m.group(1)        # "Eddy"
+            initials = list(m.group(2))  # "SR"
+
+            tmp = []
+            for c in list(m.group(2)):
+                tmp.append('{0}.'.format(c))   # [ "S.", "R." ]
+            initials = ' '.join(tmp)           # "S. R."
+
+            author.append('{0} {1}'.format(initials, surname))
+        else:
+            author.append('{0} FIXME!'.format(a['name']))
+    return ' and '.join(author)
+
+
+# Year
+#
+# JSON has   "pubdate": "2020 Jan 8",
+#
+def process_pubdate(pubdate):
+    m = re.match(r'(\d\d\d\d)', pubdate)
+    if m:
+        year = m.group(1)
+    else:
+        year = '{0} FIXME!'.format(pubdate)
+    return year
+
+
+
+################################################################
+# main
+################################################################
+
+#with open(testfile) as f:
+with urllib.request.urlopen(pmid_url.format(pmid)) as f:
+    data   = json.load(f)
+    result = data['result']['{}'.format(pmid)]
+
+    title   = process_title(result['title'])
+    author  = process_authors(result['authors'])
+    year    = process_pubdate(result['pubdate'])
+    journal = result['fulljournalname']
+    volume  = result['volume']
+    pages   = result['pages']
+
+    print('@Article{,')
+    print('  author  = {{{0}}},'.format(author))
+    print('  title   = {{{0}}},'.format(title))
+    print('  journal = {{{0}}},'.format(journal))
+    print('  year    = {0},'.format(year))
+    print('  volume  = {0},'.format(volume))
+    print('  pages   = {{{0}}},'.format(pages))
+    print('  pmid    = {0},'.format(pmid))
+    print('}\n')
+
