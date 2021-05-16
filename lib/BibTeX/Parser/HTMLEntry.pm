@@ -9,7 +9,7 @@ sub doctypes {
   my $self = shift;
   return [qw(reprint.ps reprint.pdf preprint.pdf preprint.ps
    techreport.ps techreport.pdf phdthesis.pdf phdthesis.ps
-   mastersthesis.pdf mastersthesis.ps)];
+   mastersthesis.pdf mastersthesis.ps seniorthesis.pdf)];
 }
 
 sub pubsdir {
