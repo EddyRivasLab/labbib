@@ -187,6 +187,7 @@ sub get_publications {
       if ($args{index} && $entry->key !~ /$args{index}/) {
         next;
       }
+
       if ($entry->type =~ $type) {
         $entry->pubsdir($self->pubs_dir);
         $entry->pubsurl($self->url);
@@ -217,7 +218,7 @@ sub get_publications {
   }
   else {
     #slurp in the template file provided
-    $template->process('selab.tt', $vars) || die $template->error();
+    $template->process("selab.tt", $vars) || die $template->error();
   }
   $text =~ s|\\emph\{(.*)\}|<em>$1</em>|g;
   return $text;
