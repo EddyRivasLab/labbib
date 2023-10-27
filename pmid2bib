@@ -1,121 +1,138 @@
 #! /usr/bin/env python3
 
-# pmid2bib - given a PubMed id, fetch article data using NCBI e-utils, and format for BibTeX.
+# Given a single PMID, output a formatted BibTeX entry.
 #
-# You'll still need to add a key, and also do some manual editing, especially of capitalization.
+# You have to add the citekey yourself, and you may need to do some
+# light editing of things that the script isn't smart enough to do.
+# Check for accented characters on authornames, and capitalization
+# and italics (species names) in titles.
 #
-# Usage:
-#     pmid2bib <pmid> | pbcopy
+# Usage:    pmid2bib <pmid>
+# Example:  pmid2bib 11733745
 #
+# This is also a good example of parsing XML with
+# xml.etree.ElementTree.
 
 import sys
-import getopt
 import urllib.request
-import re
-import json
-import string
+import xml.etree.ElementTree as ET
 
-usage    = "pmid2bib <pmid>"
-pmid_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={0}&retmode=json"
-#testfile = "foo.test"
+if len(sys.argv) != 2:	
+   sys.exit('Usage: pmid2bib <pmid>')
 
-# Process command line args and options
+pmid       = sys.argv[1]
+efetch_url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={}&rettype=abstract'.format(pmid);
+
+
+# Given the XML's "SR" for initials, convert to "S. R." for BibTeX.
+def format_author_initials(s):
+   initials_formatted = []
+   for c in s: initials_formatted.append('{}.'.format(c))
+   return ' '.join(initials_formatted)
+
+# Given the XML's "Title with only the first word capitalized",
+# capitalize throughout to "Title with Only the First Word
+# Capitalized". The style rule is that short prepositions,
+# conjunctions, and articles of four or fewer letters are
+# uncapitalized; here I do it with a simple list of common ones.
 #
-try:
-    (opts, args) = getopt.getopt(sys.argv[1:], "")
-except:
-    sys.exit("Failed to parse command line.\nUsage: {}".format(usage))
-if len(args) != 1:
-    sys.exit("Incorrect command line usage.\nUsage: {}".format(usage))
-pmid = args[0]
-
-
-
-################################################################
-# functions for converting fields from NCBI JSON to BibTeX 
-################################################################
-
-# Title
-# Example JSON:   "title": "CDD/SPARCLE: the conserved domain database in 2020."
+# I also try to recognize some common species names to leave
+# them uncapitalized, but you'll need to add the \emph{} yourself.
 #
-# We strip the trailing period.
+# Also, wrap anything with more than one capital letter
+# in it (example: "RNA") with {} brackets to protect the
+# capitalization in BibTeX.
 #
-# (And someday, we should fix capitalization.)
+# Python's s.title() method does NOT work for this. It converts
+# RNA to Rna, for example.
 #
-def process_title(title):
-    title = title.rstrip('.')
-    return title
+def format_title(s):
+   nocap  = ['a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'if', 'in', 'nor', 'of', 'off',
+             'on', 'or', 'up', 'so', 'the', 'to', 'up', 'via', 'with', 'yet']
+   common_species = ['cerevisiae', 'coli', 'elegans', 'furiosus', 'melanogaster', 'musculus', 'sapiens']
+   twords = []
+   nw     = 0
+   s      = s.rstrip('.')
+   for w in s.split(' '):
+      nw += 1
+      extracaps = sum(1 for c in w[1:] if c.isupper())
+      if   extracaps:              twords.append('{{{}}}'.format(w))
+      elif nw == 1:                twords.append(w)
+      elif w[0].isupper():         twords.append('{{{}}}{}'.format(w[0], w[1:]))
+      elif w in nocap:             twords.append(w)
+      elif w in common_species:    twords.append(w)
+      else:                        twords.append(w.capitalize())
+   return ' '.join(twords)
 
-# Author
+
+# Given the XML's official ISO abbreviation for the journal, typically
+# without any .'s, return the abbreviation that I use.  This is just
+# an enumerated list of journals, and it's incomplete; I'll add to it
+# over time.
 #
-# JSON has 'authors' as a list of dicts:
-#  { "authtype": "Author",
-#    "clusterid": "",
-#    "name": "Lu S" },
-#  { "authtype": "Author",
-#     "clusterid": "",
-#     "name": "Wang J"
-#  }, ....
+def format_journal(s):
+   journal_map = {
+      'Curr Biol':                'Curr. Biol.',
+      'Elife':                    'eLife',
+      'Nat Rev Genet':            'Nat. Rev. Genet.',
+      'Nucleic Acids Res':        'Nucleic Acids Res.',
+      'PLoS Biol':                'PLOS Biol.',
+      'PLoS Comput Biol':         'PLOS Comput. Biol.',
+      'Proc Natl Acad Sci U S A': 'Proc. Natl. Acad. Sci. USA',
+      }
+   if s in journal_map: return journal_map[s]
+   else:                return s
+   
+
+
+# Main body.
+# Get the XML text with urllib.request;
+# parse it with xml.etree.ElementTree.
 #
-# We convert into an `and` separated string with initials first, with periods:
-#  "S. Lu and J. Wang and ..."
+# To see the XML that's being parsed, go to a browser with e.g.
+#   https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=11733745&rettype=abstract
 #
-def process_authors(authorlist):
-    author = []
-    for a in authorlist:
-        m = re.fullmatch(r'(\S+)\s+([A-Z]+)', a['name'])
-        if m:
-            surname  = m.group(1)        # "Eddy"
-            initials = list(m.group(2))  # "SR"
+with urllib.request.urlopen(efetch_url) as response:
+   body = response.read()
+   root = ET.fromstring(body)
 
-            tmp = []
-            for c in list(m.group(2)):
-                tmp.append('{0}.'.format(c))   # [ "S.", "R." ]
-            initials = ' '.join(tmp)           # "S. R."
+   PubmedArticle = root.find('PubmedArticle')
+   authors  = []
+   for Author in PubmedArticle.iter('Author'):
+      author_surname  = Author.find('LastName').text
+      author_initials = format_author_initials(Author.find('Initials').text)
+      authors.append('{} {}'.format(author_initials, author_surname))
 
-            author.append('{0} {1}'.format(initials, surname))
-        else:
-            author.append('{0} FIXME!'.format(a['name']))
-    return ' and '.join(author)
+   title      = PubmedArticle.find('./MedlineCitation/Article/ArticleTitle').text
+   journal    = PubmedArticle.find('./MedlineCitation/Article/Journal/ISOAbbreviation').text
+   volume     = PubmedArticle.find('./MedlineCitation/Article/Journal/JournalIssue/Volume').text
 
+   # For single "page numbers" that are really an e-identifier, they can either
+   # appear as an "ELocationID" of type "pii", or a StartPage without an EndPage.
+   if PubmedArticle.find('./MedlineCitation/Article/Pagination'):
+      page_start = PubmedArticle.find('./MedlineCitation/Article/Pagination/StartPage')
+      page_end   = PubmedArticle.find('./MedlineCitation/Article/Pagination/EndPage')
+      if page_end != None: pages = '{}-{}'.format(page_start.text, page_end.text)
+      else:                pages = '{}'.format(page_start.text)
+   else:
+      for eloc in PubmedArticle.findall('./MedlineCitation/Article/ELocationID'):
+         if (eloc.get('EIdType') == 'pii'): pages = eloc.text
 
-# Year
-#
-# JSON has   "pubdate": "2020 Jan 8",
-#
-def process_pubdate(pubdate):
-    m = re.match(r'(\d\d\d\d)', pubdate)
-    if m:
-        year = m.group(1)
-    else:
-        year = '{0} FIXME!'.format(pubdate)
-    return year
+   idlist = PubmedArticle.find('./PubmedData/ArticleIdList')
+   pmcid  = None
+   doi    = None
+   for id in idlist.findall('ArticleId'):
+      if   (id.get('IdType') == 'pmc'):   pmcid = id
+      elif (id.get('IdType') == 'doi'):   doi   = id
 
-
-
-################################################################
-# main
-################################################################
-
-#with open(testfile) as f:
-with urllib.request.urlopen(pmid_url.format(pmid)) as f:
-    data   = json.load(f)
-    result = data['result']['{}'.format(pmid)]
-
-    title   = process_title(result['title'])
-    author  = process_authors(result['authors'])
-    year    = process_pubdate(result['pubdate'])
-    journal = result['fulljournalname']
-    volume  = result['volume']
-    pages   = result['pages']
-
-    print('@Article{,')
-    print('  author  = {{{0}}},'.format(author))
-    print('  title   = {{{0}}},'.format(title))
-    print('  journal = {{{0}}},'.format(journal))
-    print('  year    = {0},'.format(year))
-    print('  volume  = {0},'.format(volume))
-    print('  pages   = {{{0}}},'.format(pages))
-    print('  pmid    = {0},'.format(pmid))
-    print('}\n')
-
+   print ('@Article{,')
+   print ('  author     = {{{}}},'.format(' and '.join(authors)))
+   print ('  title      = {{{}}},'.format(format_title(title)))
+   print ('  journal    = {{{}}},'.format(format_journal(journal)))
+   print ('  volume     = {},'.format(volume))
+   print ('  pages      = {{{}}},'.format(pages))
+   print ('  pmid       = {},'.format(pmid))   
+   if pmcid != None: print ('  pmcid      = {{{}}},'.format(pmcid.text))
+   if doi   != None: print ('  reprinturl = {{https://doi.org/{}}},'.format(doi.text))
+   print ('}')
+ 
