@@ -4,17 +4,33 @@
 % online publication. Can't use "url" as the keyword -
 % some .bst styles will pick that up and try to use it
 % in their reference (bmc_article.bst, for example).
+%
+% Emacs shortcuts:
+%   C-C C-e C-a  for Article                  
+%   C-c C-e C-u  for Unpublished, including preprints                 
+%   C-c C-e P    for PhD thesis
+                  
+
+@Comment @PhdThesis{Richardson23,
+@Comment   author = 	 {M. O. Richardson},
+@Comment   title = 	 {Computational Prediction of Alternative Translation Events},
+@Comment   school = 	 {Harvard University},
+@Comment   year = 	 2023
+@Comment  }
 
                   
 
-@Unpublished{RichardsonEddy23,
+@Article{RichardsonEddy23,
   author = 	 {M. O. Richardson and S. R. Eddy},
   title = 	 {{ORFeus:} A Computational Method to Detect Programmed
                   Ribosomal Frameshifts and Other Non-Canonical
                   Translation Events},
-  note = 	 {bioRxiv, and manuscript submitted},
+  journal = 	 {BMC Bioinformatics},
   year = 	 2023,
-  reprinturl =   {https://doi.org/10.1101/2023.04.24.538127},                  
+  volume = 	 24,
+  pages = 	 471,
+  pmid = 	 38093195,
+  reprinturl = {https://doi.org/10.1186/s12859-023-05602-8},
 }
 
 @Article{Petti23,
